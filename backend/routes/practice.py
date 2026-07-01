@@ -6,6 +6,7 @@ from backend.repositories.problem_repository import ProblemRepository
 from backend.repositories.progress_repository import ProgressRepository
 from backend.services.practice_service import PracticeService
 from backend.schemas.practice import ProblemResponse, SubmitRequest, SubmitResponse
+import traceback
 
 router = APIRouter()
 
@@ -26,5 +27,6 @@ def get_practice_problem(service: PracticeService = Depends(get_practice_service
 def submit_practice_problem(request: SubmitRequest, service: PracticeService = Depends(get_practice_service)):
     try:
         return service.evaluate_submission(request)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        traceback.print_exc()
+        raise

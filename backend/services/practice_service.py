@@ -111,6 +111,5 @@ class PracticeService:
             "correct": is_solved,
             "correct_answer": correct_answer,
             "explanation": getattr(problem, "solution", ""),
-            "next_review_date": str(next_review_date),
-            "new_interval_days": new_interval,
+            "new_sm2_interval": new_interval,
         }

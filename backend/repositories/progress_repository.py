@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime, timedelta
 from sqlalchemy import Integer
+from sqlalchemy import text
 
 # Using the exact existing models
 from models.db_models import Attempt, ReviewSchedule, Problem
@@ -14,6 +15,8 @@ class ProgressRepository:
     
     def __init__(self, db: Session):
         self.db = db
+        print("DATABASE FILE:",
+        self.db.execute(text("PRAGMA database_list")).fetchall())
         # Hardcoding a user_id for now since auth isn't fully implemented
         self.current_user_id = 1 
 

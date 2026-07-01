@@ -6,7 +6,7 @@ class ProblemResponse(BaseModel):
     question: str
     options: Optional[Dict[str, str]] = None
     topic: str
-    difficulty: int
+    difficulty: str
     
     class Config:
         from_attributes = True # Allows Pydantic to read from your existing SQLAlchemy models
