@@ -3,8 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.config import settings
 from backend.routes import practice, dashboard
 from contextlib import asynccontextmanager
+from database.connection import init_db
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
 app = FastAPI(
+    lifespan=lifespan,
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="Production backend for PrepPal AI Capstone",

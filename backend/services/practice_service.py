@@ -1,44 +1,116 @@
-from sqlalchemy.orm import Session
 import logging
-from backend.schemas.practice import SubmitRequest
 
-# TODO: Import your existing models and SM2 utils here
-# from database.models import Problem, UserProgress
-# from utils.sm2 import calculate_sm2
+from backend.schemas.practice import SubmitRequest
+from backend.repositories.problem_repository import ProblemRepository
+from backend.repositories.progress_repository import ProgressRepository
+from utils.sm2 import calculate_next_review, attempt_to_quality
 
 logger = logging.getLogger(__name__)
 
-class PracticeService:
-    def __init__(self, db: Session):
-        self.db = db
 
-    def get_next_problem(self):
-        """Fetches the next problem based on SM-2 spacing."""
-        logger.info("Fetching next optimal problem.")
-        # Hook up your existing SQLite query here.
-        # e.g., return self.db.query(Problem).filter(...).first()
-        
-        # Returning mock data so the app remains runnable immediately
+class PracticeService:
+
+    def __init__(
+        self,
+        problem_repo: ProblemRepository,
+        progress_repo: ProgressRepository,
+    ):
+        self.problem_repo = problem_repo
+        self.progress_repo = progress_repo
+
+    def recommend_problem(self) -> dict:
+        """Recommend a DSA problem."""
+
+        due_topics = self.progress_repo.get_topics_due_for_review()
+
+        if due_topics:
+            target_topic = due_topics[0]
+            reason = f"It's time to review {target_topic}."
+        else:
+            weak_topics = self.progress_repo.get_weak_topics()
+            target_topic = weak_topics[0] if weak_topics else None
+            reason = (
+                f"Let's strengthen {target_topic}."
+                if target_topic
+                else "Here's a new challenge."
+            )
+
+        problem = self.problem_repo.get_random(topic=target_topic)
+
+        if problem is None:
+            return None
+
+        estimated_time = {
+            "Easy": 15,
+            "Medium": 30,
+            "Hard": 45,
+        }.get(problem.difficulty, 30)
+
         return {
-            "id": 1,
-            "question": "What is the time complexity of binary search?",
-            "options": {"A": "O(1)", "B": "O(n)", "C": "O(log n)", "D": "O(n^2)"},
-            "topic": "Algorithms",
-            "difficulty": 2
+            "id": problem.id,
+            "question": problem.description,
+            "topic": problem.topic,
+            "difficulty": problem.difficulty,
+            "recommendation_reason": reason,
+            "estimated_time_minutes": estimated_time,
+            "hint": f"Think about standard approaches to {problem.topic}.",
         }
 
-    def evaluate_submission(self, request: SubmitRequest):
-        """Evaluates correctness and updates SM-2 parameters."""
-        logger.info(f"Evaluating submission for problem_id: {request.problem_id}")
-        
-        # 1. Fetch problem from self.db
-        # 2. Check correctness
-        # 3. Call your existing SM-2 logic
-        # 4. Commit to self.db
+    def evaluate_submission(self, request: SubmitRequest) -> dict:
+        """Evaluate a user's submission."""
+
+        problem = self.problem_repo.get_by_id(request.problem_id)
+
+        if problem is None:
+            raise ValueError("Problem not found.")
+
+        correct_answer = getattr(problem, "solution", "")
+
+        is_solved = (
+            str(request.user_answer).strip().lower()
+            == str(correct_answer).strip().lower()
+        )
+
+        quality = attempt_to_quality(
+            is_solved=is_solved,
+            hint_level=0,
+            attempts=1,
+        )
+
+        previous_interval = 1
+        previous_repetitions = 0
+        previous_ease_factor = 2.5
+
+        (
+            new_interval,
+            new_ease_factor,
+            new_repetitions,
+            next_review_date,
+        ) = calculate_next_review(
+            ease_factor=previous_ease_factor,
+            interval_days=previous_interval,
+            repetitions=previous_repetitions,
+            quality=quality,
+        )
+
+        self.progress_repo.store_attempt(
+            problem_id=problem.id,
+            is_solved=is_solved,
+            time_spent_minutes=request.time_taken_seconds / 60,
+            hint_level_used=0,
+        )
+
+        self.progress_repo.update_sm2_progress(
+            problem_id=problem.id,
+            interval_days=new_interval,
+            repetitions=new_repetitions,
+            ease_factor=new_ease_factor,
+        )
 
         return {
-            "correct": True,
-            "correct_answer": "C",
-            "explanation": "Binary search halves the search space each iteration.",
-            "new_sm2_interval": 3
+            "correct": is_solved,
+            "correct_answer": correct_answer,
+            "explanation": getattr(problem, "solution", ""),
+            "next_review_date": str(next_review_date),
+            "new_interval_days": new_interval,
         }
