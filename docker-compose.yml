@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: preppal_mcp
+    env_file: .env
+    ports:
+      - "8001:8001"
+    volumes:
+      - preppal_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.connect(('localhost',8001)); s.close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: preppal_api
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - preppal_data:/app/data
+    depends_on:
+      mcp:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - MCP_SERVER_HOST=mcp
+      - MCP_SERVER_PORT=8001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: preppal_frontend
+    env_file: .env
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      - FASTAPI_HOST=api
+      - FASTAPI_PORT=8000
+
+volumes:
+  preppal_data:
+    driver: local
