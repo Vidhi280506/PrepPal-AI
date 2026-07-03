@@ -4,6 +4,7 @@ import asyncio
 import json
 
 DEV_MODE = True
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 if PROJECT_ROOT not in sys.path:
@@ -17,6 +18,9 @@ _loop = None
 
 
 def _get_loop():
+    """
+    Returns a reusable event loop.
+    """
     global _loop
 
     if _loop is None:
@@ -25,127 +29,129 @@ def _get_loop():
     return _loop
 
 
+def _get_service():
+    """
+    Initializes PrepPalService only once and reuses it.
+    """
+    global _service
+
+    loop = _get_loop()
+
+    asyncio.set_event_loop(loop)
+
+    if _service is None:
+        _service = PrepPalService()
+        loop.run_until_complete(_service.initialize())
+
+    return _service, loop
+
+
 def ask_preppal(message: str) -> str:
     """
     Sends a message to PrepPal AI and returns the response.
     """
+
     if DEV_MODE:
 
         msg = message.lower()
 
         if "progress" in msg:
             return """
-    ## 📈 Progress Summary
+## 📈 Progress Summary
 
-    Problems Solved: **42**
+Problems Solved: **42**
 
-    Accuracy: **78%**
+Accuracy: **78%**
 
-    Weak Topics:
-    - Graphs
-    - Dynamic Programming
+Weak Topics:
+- Graphs
+- Dynamic Programming
 
-    Today's Recommendation:
-    Practice 3 Graph problems.
-    """
+Today's Recommendation:
+Practice 3 Graph problems.
+"""
 
         elif "array" in msg:
-           return """
-    ## 📚 Arrays Practice
+            return """
+## 📚 Arrays Practice
 
-    ### Two Sum
+### Two Sum
 
-    Difficulty: Easy
+Difficulty: Easy
 
-    Hint:
-    Use a HashMap to store previously seen values.
-    """
+Hint:
+Use a HashMap to store previously seen values.
+"""
 
         elif "graph" in msg:
-           return """
-    ## 📚 Graph Practice
+            return """
+## 📚 Graph Practice
 
-    ### Number of Islands
+### Number of Islands
 
-    Difficulty: Medium
+Difficulty: Medium
 
-    Hint:
-    DFS or BFS traversal.
-    """
+Hint:
+DFS or BFS traversal.
+"""
 
         elif "dynamic" in msg or "dp" in msg:
             return """
-    ## 📚 Dynamic Programming
+## 📚 Dynamic Programming
 
-    ### Climbing Stairs
+### Climbing Stairs
 
-    Difficulty: Easy
+Difficulty: Easy
 
-    Hint:
-    Think Fibonacci.
-    """
+Hint:
+Think Fibonacci.
+"""
 
         else:
             return f"""
-    ## 🤖 PrepPal (Development Mode)
+## 🤖 PrepPal (Development Mode)
 
-    You asked:
+You asked:
 
-    > {message}
+> {message}
 
-    This is a mock response.
+This is a mock response.
 
-    Gemini was NOT called.
-    """
+Gemini was NOT called.
+"""
 
-    global _service
-
-    loop = _get_loop()
-
-    asyncio.set_event_loop(loop)
-
-    if _service is None:
-        _service = PrepPalService()
-        loop.run_until_complete(_service.initialize())
+    service, loop = _get_service()
 
     return loop.run_until_complete(
-        _service.send_message(message)
+        service.send_message(message)
     )
 
+
 def get_progress():
+    """
+    Returns the user's progress dashboard data.
+    """
 
-    global _service
-
-    loop = _get_loop()
-
-    asyncio.set_event_loop(loop)
-
-    if _service is None:
-        _service = PrepPalService()
-        loop.run_until_complete(_service.initialize())
+    service, loop = _get_service()
 
     result = loop.run_until_complete(
-        _service.get_progress()
+        service.get_progress()
     )
 
     text = result.content[0].text
 
     return json.loads(text)
 
+
 def get_review_queue():
+    """
+    Returns the user's spaced repetition review queue.
+    """
 
-    global _service
-
-    loop = _get_loop()
-
-    asyncio.set_event_loop(loop)
-
-    if _service is None:
-        _service = PrepPalService()
-        loop.run_until_complete(_service.initialize())
+    service, loop = _get_service()
 
     result = loop.run_until_complete(
-        _service.get_review_queue()
+        service.get_review_queue()
     )
 
     text = result.content[0].text

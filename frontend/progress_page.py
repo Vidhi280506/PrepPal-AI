@@ -5,10 +5,20 @@ from backend import get_progress
 def render_progress():
 
     st.title("📈 Progress Dashboard")
+    
+    try:
+        with st.spinner("Loading your progress..."):
+            data = get_progress()
+            progress = data["progress"]
 
-    data = get_progress()
+    except Exception as e:
+        st.error("Unable to load your progress.")
+        st.caption(str(e))
+        return
+    
+    #data = get_progress()
 
-    progress = data["progress"]
+    #progress = data["progress"]
 
     col1, col2, col3 = st.columns(3)
 

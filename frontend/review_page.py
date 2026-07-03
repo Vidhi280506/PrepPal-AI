@@ -3,9 +3,19 @@ from backend import get_review_queue
 
 def render_review():
 
-    data = get_review_queue()
+    #data = get_review_queue()
 
-    review_problems = data["due_reviews"]
+    #review_problems = data["due_reviews"]
+
+    try:
+        with st.spinner("Loading your review queue..."):
+            data = get_review_queue()
+            review_problems = data["due_reviews"]
+
+    except Exception as e:
+        st.error(" Unable to load your review queue.")
+        st.caption(str(e))
+        return
 
     st.title("📚 Review Queue")
 
@@ -13,7 +23,15 @@ def render_review():
 
     st.divider()
 
-   
+    if not review_problems:
+
+        st.success("🎉 Great job!")
+
+        st.info(
+            "You have no pending review problems."
+        )
+
+        return
 
     for problem in review_problems:
 
