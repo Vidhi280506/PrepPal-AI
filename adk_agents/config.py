@@ -2,12 +2,16 @@
 Configuration for PrepPal AI ADK Agents.
 """
 
-# Default Gemini model used by all agents
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 MODEL_NAME = "gemini-2.5-flash"
 
-# Logging
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
 LOG_LEVEL = "INFO"
 
-# Future configuration
 MAX_RETRIES = 3
 REQUEST_TIMEOUT = 30

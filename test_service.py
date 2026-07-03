@@ -8,8 +8,8 @@ async def main():
 
     await service.initialize()
 
-    print("Session Created!")
-    print(service.adk_session)
+    print("Runner Created!")
+    print(service.runner)
 
     await service.shutdown()
 

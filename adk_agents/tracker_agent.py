@@ -39,7 +39,7 @@ def create_tracker_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
     """
     logger.info("Initializing the PrepPal AI Tracker Agent.")
 
-    def get_progress() -> str:
+    async def get_progress() -> str:
         """
         Retrieves user dashboard metrics including total problems solved, 
         overall accuracy, mastered topics, and identified weak domains.
@@ -55,10 +55,8 @@ def create_tracker_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
 
         try:
             # Safely wrap the async MCP call for the synchronous ADK framework execution
-            loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(
-                mcp_session.call_tool("get_progress", arguments={})
-            )
+            
+            result = await mcp_session.call_tool("get_progress", arguments={})
             
             if not result or not getattr(result, "content", None):
                 logger.warning("MCP get_progress returned an empty or malformed response.")
@@ -70,7 +68,7 @@ def create_tracker_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
             logger.exception(f"Failed to fetch progress metrics via MCP: {e}")
             return json.dumps({"error": f"Failed to communicate with MCP server: {str(e)}"})
 
-    def get_review_queue() -> str:
+    async def get_review_queue() -> str:
         """
         Retrieves the list of topics and problems that have become due for 
         revision based on the SM-2 spaced repetition schedules.
@@ -86,9 +84,9 @@ def create_tracker_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
 
         try:
             # Safely wrap the async MCP call for the synchronous ADK framework execution
-            loop = asyncio.get_event_loop()
-            result = loop.run_until_complete(
-                mcp_session.call_tool("get_review_queue", arguments={})
+            result = await mcp_session.call_tool(
+                "get_review_queue",
+                 arguments={}
             )
             
             if not result or not getattr(result, "content", None):

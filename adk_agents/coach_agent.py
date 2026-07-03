@@ -36,7 +36,7 @@ def create_coach_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
 
     logger.info("Initializing PrepPal Coach Agent.")
 
-    def get_problem(
+    async def get_problem(
         topic: str = "",
         difficulty: str = ""
     ) -> str:
@@ -67,13 +67,9 @@ def create_coach_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
 
         try:
 
-            loop = asyncio.get_event_loop()
-
-            result = loop.run_until_complete(
-                mcp_session.call_tool(
-                    "get_problem",
-                    arguments=arguments,
-                )
+            result = await mcp_session.call_tool(
+               "get_problem",
+                arguments=arguments
             )
 
             if getattr(result, "content", None):
@@ -91,7 +87,7 @@ def create_coach_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
                 "error": str(e)
             })
 
-    def submit_attempt(
+    async def submit_attempt(
         problem_id: int,
         solved: bool,
         time_spent_minutes: int,
@@ -114,17 +110,13 @@ def create_coach_agent(mcp_session: Optional[Any] = None) -> LlmAgent:
 
         try:
 
-            loop = asyncio.get_event_loop()
-
-            result = loop.run_until_complete(
-                mcp_session.call_tool(
-                    "submit_attempt",
-                    arguments={
-                        "problem_id": problem_id,
-                        "solved": solved,
-                        "time_spent_minutes": time_spent_minutes,
-                    },
-                )
+            result = await mcp_session.call_tool(
+                "submit_attempt",
+                arguments={
+                "problem_id": problem_id,
+                "solved": solved,
+                "time_spent_minutes": time_spent_minutes,
+                },
             )
 
             if getattr(result, "content", None):

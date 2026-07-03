@@ -2,6 +2,7 @@ import logging
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
+from sqlalchemy import func
 
 # Using your existing models
 from models.db_models import Problem
@@ -28,9 +29,37 @@ class ProblemRepository:
 
     def get_random(self, topic: Optional[str] = None) -> Optional[Problem]:
         """Selects a random problem, optionally filtered by topic."""
+
         query = self.db.query(Problem)
+
         if topic:
-            query = query.filter(Problem.topic == topic)
-        
-        # func.random() is natively supported in SQLite for random row selection
+            topic = topic.strip().lower()
+
+            # Handle common singular/plural variations
+            topic_aliases = {
+              "array": "arrays",
+              "arrays": "arrays",
+              "graph": "graphs",
+              "graphs": "graphs",
+              "tree": "trees",
+              "trees": "trees",
+              "heap": "heaps",
+              "heaps": "heaps",
+              "string": "strings",
+              "strings": "strings",
+              "linked list": "linked lists",
+              "linked lists": "linked lists",
+              "dp": "dynamic programming",
+              "dynamic programming": "dynamic programming",
+              "binary search": "binary search",
+              "backtracking": "backtracking",
+              "sliding window": "sliding window",
+            }
+
+        normalized_topic = topic_aliases.get(topic, topic)
+
+        query = query.filter(
+            func.lower(Problem.topic) == normalized_topic
+        )
+
         return query.order_by(func.random()).first()

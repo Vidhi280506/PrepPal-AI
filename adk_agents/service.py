@@ -111,6 +111,15 @@ class PrepPalService:
             user_id=self.user_id,
             session_id=self.session_id,
         )
+        logger.info("Creating Google ADK Runner...")
+
+        self.runner = Runner(
+            app_name=self.app_name,
+            agent=self.root_agent,
+            session_service=self.session_service,
+        )
+
+        logger.info("Runner created successfully.")
 
         logger.info("ADK session created successfully.")
 
@@ -146,7 +155,41 @@ class PrepPalService:
         )
 
         return result
+    
+    async def send_message(self, message: str) -> str:
+        """
+        Send a user message through the ADK Runner and return the final
+        assistant response.
+        """
 
+        if self.runner is None:
+            raise RuntimeError("Runner has not been initialized.")
+
+        user_message = types.Content(
+            role="user",
+            parts=[
+                types.Part(text=message)
+            ]
+        )
+
+        final_response = ""
+
+        async for event in self.runner.run_async(
+            user_id=self.user_id,
+            session_id=self.session_id,
+            new_message=user_message,
+        ):
+            # Ignore events without content
+            if event.content is None:
+                continue
+
+            # Extract text from model responses
+            for part in event.content.parts:
+                if getattr(part, "text", None):
+                    final_response = part.text
+
+        return final_response
+    
     def initialize_agents(self):
         """
         Create the Coach, Tracker, and Root agents.
