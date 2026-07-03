@@ -59,12 +59,17 @@ class PrepPalService:
         self.tracker_agent = None
 
         logger.info("PrepPalService object created.")
+
+        self.initialized = False
     
     async def initialize(self):
         """
         Initialize the MCP connection and prepare the ADK runtime.
         """
-
+        if self.initialized:
+            logger.info("PrepPalService already initialized.")
+            return
+        
         logger.info("Initializing PrepPal AI Service...")
 
     
@@ -129,6 +134,8 @@ class PrepPalService:
 
         logger.info("MCP stdio context created.")
 
+        self.initialized = True
+
     async def shutdown(self):
         """
         Gracefully close all async resources.
@@ -174,21 +181,49 @@ class PrepPalService:
 
         final_response = ""
 
-        async for event in self.runner.run_async(
-            user_id=self.user_id,
-            session_id=self.session_id,
-            new_message=user_message,
-        ):
-            # Ignore events without content
-            if event.content is None:
-                continue
+        
+        try:
+            async for event in self.runner.run_async(
+                user_id=self.user_id,
+                session_id=self.session_id,
+                new_message=user_message,
+            ):
+                if event.content is None:
+                    continue
 
-            # Extract text from model responses
-            for part in event.content.parts:
-                if getattr(part, "text", None):
-                    final_response = part.text
+                for part in event.content.parts:
+                    if getattr(part, "text", None):
+                        final_response = part.text
 
+        except Exception:
+            logger.exception("Runner failed")
+            raise
+        
         return final_response
+    
+    async def get_progress(self):
+        """
+        Fetch progress directly from the MCP server.
+        """
+
+        result = await self.mcp_session.call_tool(
+            "get_progress",
+             arguments={} 
+        )
+
+        return result
+    
+    async def get_review_queue(self):
+        """
+        Fetch the spaced repetition review queue directly from the MCP server.
+        """
+
+        result = await self.mcp_session.call_tool(
+            "get_review_queue",
+            arguments={}
+        )
+
+        return result
     
     def initialize_agents(self):
         """
