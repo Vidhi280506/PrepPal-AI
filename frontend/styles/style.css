@@ -1,0 +1,35 @@
+/* Main App */
+.main {
+    padding-top: 1rem;
+}
+
+/* Metric Cards */
+[data-testid="stMetric"] {
+    background-color: #1e293b;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #334155;
+}
+
+/* Buttons */
+.stButton > button {
+    width: 100%;
+    border-radius: 10px;
+    height: 3em;
+    font-weight: 600;
+}
+
+/* Chat Messages */
+.stChatMessage {
+    border-radius: 14px;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #111827;
+}
+
+/* Info/Success Cards */
+div[data-testid="stAlert"] {
+    border-radius: 12px;
+}

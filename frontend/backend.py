@@ -115,9 +115,11 @@ You asked:
 
 > {message}
 
-This is a mock response.
+🛠 Development Mode
 
-Gemini was NOT called.
+PrepPal is currently running with mock AI responses to conserve Gemini API quota during development. 
+
+In Production Mode, requests are routed through Google ADK to Gemini 2.5 Flash.
 """
 
     service, loop = _get_service()
