@@ -62,12 +62,24 @@ Unlike traditional DSA practice platforms, PrepPal analyzes user performance, id
 
 ### 🏠 Home Dashboard
 
+<p align="center">
+  <img src="screenshots/home_1.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/home_2.png" width="900">
+</p>
+
 - Personalized recommendations
 - Daily coding goals
 - Quick actions
 - AI insights
 
 ### 💬 AI Chat
+
+<p align="center">
+  <img src="screenshots/chat.png" width="900">
+</p>
 
 - Coding guidance
 - Problem recommendations
@@ -76,6 +88,22 @@ Unlike traditional DSA practice platforms, PrepPal analyzes user performance, id
 
 ### 📈 Progress Dashboard
 
+<p align="center">
+  <img src="screenshots/progress_1.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/progress_2.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/progress_3.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/progress_4.png" width="900">
+</p>
+
 - Accuracy tracking
 - Weak topic detection
 - Weekly activity
@@ -83,16 +111,52 @@ Unlike traditional DSA practice platforms, PrepPal analyzes user performance, id
 
 ### 📚 Review Queue
 
+<p align="center">
+  <img src="screenshots/review_1.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/review_2.png" width="900">
+</p>
+
 - Smart revision scheduling
 - Personalized review recommendations
 
 ### 🏗 Architecture
+
+<p align="center">
+  <img src="screenshots/architecture_1.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/architecture_2.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/architecture_3.png" width="900">
+</p>
 
 - Interactive system overview
 - Request flow
 - Multi-agent design
 
 ### ⚙️ Settings
+
+<p align="center">
+  <img src="screenshots/settings_1.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/settings_2.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/settings_3.png" width="900">
+</p>
+
+<p align="center">
+  <img src="screenshots/settings_4.png" width="900">
+</p>
 
 - AI configuration
 - Backend status
