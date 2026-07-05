@@ -155,7 +155,7 @@ Unlike traditional DSA practice platforms, PrepPal analyzes user performance, id
 </p>
 
 <p align="center">
-  <img src="screenshots/settings_4.png" width="900">
+  <img src="screenshots/settings_last.png" width="900">
 </p>
 
 - AI configuration
